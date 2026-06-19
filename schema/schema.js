@@ -1,47 +1,48 @@
-const { GraphQLSchema, GraphQLObjectType, GraphQLString, GraphQLInt } = require("graphql");
-// custome user
-const UserType=new GraphQLObjectType(
-    {
-        name:"users",
-        fields:{
-            id:{type:GraphQLString},
-            name:{type:GraphQLString},
-            age:{type:GraphQLInt}
-        }
-    }
-);
+const {
+  GraphQLSchema,
+  GraphQLObjectType,
+  GraphQLString,
+  GraphQLInt,
+} = require("graphql");
+const UserType = new GraphQLObjectType({
+  name: "user",
+  fields: {
+    id: { type: GraphQLString },
+    name: { type: GraphQLString },
+    age: { type: GraphQLInt },
+  },
+});
 const RootQuery = new GraphQLObjectType({
   name: "RootQueryType",
   fields: {
-    user:{
-type:UserType,
-args:{id:{type:GraphQLString}},
-resolve(parent,args){
-const users=[
-    {
-        id:'1',
-        name:'sattar',
-        age:23
+    user: {
+      type: UserType,
+      args: { id: { type: GraphQLString } },
+      resolve(parent, args) {
+        const users = [
+          {
+            id: "1",
+            name: "sattar",
+            age: 22,
+          },
+          {
+            id: "2",
+            name: "haroon",
+            age: 2,
+          },
+        ];
+        const user = users.find((user) => user.id === args.id);
+        return user;
+      },
     },
-    {
-        id:'2',
-        name:'haroon',
-        age:24
+    hello: {
+      type: GraphQLString,
+      resolve() {
+        return "hello sattar";
+      },
     },
-    {
-        id:'3',
-        name:'kashif',
-        age:22
-    }
-]
- return users.find(user=>user.id === args.id)
-}
-    },
-   
-  }
+  },
 });
-
-const schema = new GraphQLSchema({
+module.exports = new GraphQLSchema({
   query: RootQuery,
 });
-module.exports = schema;
