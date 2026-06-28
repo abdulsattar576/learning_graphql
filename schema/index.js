@@ -11,6 +11,8 @@ const BookType = require("../types/book.type");
 const BookModal = require("../model/auther/book");
 const AuthorModel = require("../model/auther/Auther");
 const BookPaginationType = require("../types/book.pagination");
+const CategoryType = require("../types/category.type");
+const CategoryModal = require("../model/category");
 const RootMuatation = new GraphQLObjectType({
   name: "mutation",
   fields: {
@@ -25,9 +27,26 @@ const RootMuatation = new GraphQLObjectType({
         return author;
       },
     },
+    addCategory: {
+      type: CategoryType,
+      args: {
+        name: { type: GraphQLString },
+        parentCategory: { type: GraphQLID },
+      },
+      async resolve(parent, args) {
+        return await CategoryModal.create({
+          name: args.name,
+          parentCategory: args.parentCategory || null,
+        });
+      },
+    },
     AddBook: {
       type: BookType,
-      args: { id: { type: GraphQLID }, title: { type: GraphQLString } },
+      args: {
+        id: { type: GraphQLID },
+        title: { type: GraphQLString },
+        categoryId: { type: GraphQLID },
+      },
       async resolve(parent, args) {
         if (!args.id || !args.title) {
           throw new Error("Both field are  required");
@@ -35,6 +54,7 @@ const RootMuatation = new GraphQLObjectType({
         const Book = await BookModal.create({
           title: args.title,
           authorId: args.id,
+          categoryId: args.categoryId,
         });
         return Book;
       },
@@ -57,7 +77,7 @@ const RootQuery = new GraphQLObjectType({
         authorId: { type: GraphQLID },
       },
       resolve(parent, args) {
-        const limit = 2;
+        const limit = 13;
         const page = args.page || 1;
         const offset = (page - 1) * limit;
         let filter = {};
@@ -107,6 +127,13 @@ const RootQuery = new GraphQLObjectType({
           hasNextPage: page < totalPages ? "true" : "false",
           hasPreviousPage: page > 1 ? "true" : "false",
         };
+      },
+    },
+    GetBookByCategoryName: {
+      type: CategoryType,
+      args: { id: { type: GraphQLID } },
+      async resolve(parent, args) {
+        return await CategoryModal.findById(args.id);
       },
     },
   },
